@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { CreateUserUseCase } from "./CreateUserUseCase";
+import * as bcrypt from "bcrypt";
 
 export class CreateUserController {
     constructor(private createUserUseCase: CreateUserUseCase) {}
@@ -13,8 +14,14 @@ export class CreateUserController {
         if (!password)
             return res.status(400).json({ message: "Password is required" });
 
+        const hash = bcrypt.hashSync(password, 10);
+
         try {
-            await this.createUserUseCase.execute({ name, email, password });
+            await this.createUserUseCase.execute({
+                name,
+                email,
+                password: hash,
+            });
 
             return res
                 .status(201)
@@ -26,4 +33,3 @@ export class CreateUserController {
         }
     }
 }
-
